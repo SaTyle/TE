@@ -1,0 +1,61 @@
+# Importing necessary libraries
+import pandas as pd
+import numpy as np
+import os
+import csv
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
+
+# Exploring files in the Kaggle input directory
+for dirname, _, filenames in os.walk('/kaggle/input'):
+    for filename in filenames:
+        print(os.path.join(dirname, filename))
+
+# Initializing an empty list to store the dataset
+data = []
+
+# Reading the data from the CSV file into the 'data' list
+with open("D:\Collage-Stuff\Market_Basket_Optimisation.csv") as file:
+    reader = csv.reader(file, delimiter=',')
+    for row in reader:
+        data += [row]
+
+# Printing the first 10 rows of the dataset
+print(data[1:10])
+
+# Calculating the length of the dataset
+print(len(data))
+
+# Initializing TransactionEncoder to transform the dataset into transaction format
+te = TransactionEncoder() 
+
+# Encoding the dataset using TransactionEncoder
+x = te.fit_transform(data)
+
+# Printing the transformed dataset
+print(x)
+
+# Obtaining the column names after transformation
+te.columns_
+
+# Creating a DataFrame from the encoded dataset
+df = pd.DataFrame(x, columns=te.columns_)
+
+# Printing the DataFrame
+print(df)
+
+# Finding frequent itemsets with a minimum support of 0.01
+freq_itemset = apriori(df, min_support=0.01, use_colnames=True)
+
+# Finding association rules with a minimum confidence of 0.10
+rules = association_rules(freq_itemset, metric='confidence', min_threshold=0.10)
+
+# Extracting and displaying relevant columns from the rules
+rules = rules[['antecedents', 'consequents', 'support', 'confidence']]
+print(rules)
+
+# Finding consequents related to the antecedent 'cake'
+cake_rules = rules[rules['antecedents'] == {'cake'}]['consequents']
+
+# Printing the consequents related to 'cake'
+print(cake_rules)

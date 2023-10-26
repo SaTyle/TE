@@ -1,0 +1,51 @@
+# Importing necessary libraries
+import pandas as pd
+from sklearn import metrics
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+
+# Reading the dataset into a pandas DataFrame
+df = pd.read_csv("D:\Collage-Stuff\Mall_Customers.csv")
+
+# Extracting the relevant features from the dataset (Annual Income and Spending Score)
+x = df.iloc[:, [3, 4]].values
+
+# Initializing an empty list to store Within-Cluster-Sum-of-Squares (WCSS) values
+wcss = []
+
+# Finding the optimal number of clusters using the Elbow Method
+for i in range(1, 11):
+    kmeans = KMeans(n_clusters=i)
+    kmeans.fit(x)
+    wcss.append(kmeans.inertia_)
+
+# Plotting the Elbow Method graph to find the optimal number of clusters
+plt.plot(range(1, 11), wcss, marker='1')
+plt.xlabel('Number of clusters')
+plt.ylabel('WCSS')  # Within-Cluster-Sum-of-Squares
+plt.show()
+
+# Initializing KMeans with 5 clusters, k-means++ initialization, and setting random state for reproducibility
+kmeans = KMeans(n_clusters=5, init="k-means++", random_state=42)
+
+# Fitting the KMeans algorithm to the data and obtaining cluster labels for each data point
+y_kmeans = kmeans.fit_predict(x)
+
+# Visualizing the clusters along with centroids
+plt.scatter(x[y_kmeans == 0, 0], x[y_kmeans == 0, 1], s=60, c='yellow', label='cluster1')
+plt.scatter(x[y_kmeans == 1, 0], x[y_kmeans == 1, 1], s=60, c='orange', label='cluster2')
+plt.scatter(x[y_kmeans == 2, 0], x[y_kmeans == 2, 1], s=60, c='green', label='cluster3')
+plt.scatter(x[y_kmeans == 3, 0], x[y_kmeans == 3, 1], s=60, c='red', label='cluster4')
+plt.scatter(x[y_kmeans == 4, 0], x[y_kmeans == 4, 1], s=60, c='blue', label='cluster5')
+plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], s=100, c='blue', label='Centroids')
+plt.xlabel('Annual Income (K$)')
+plt.ylabel('Spending Score (1-100)')
+plt.legend()
+plt.show()
+
+# Calculating the silhouette score to measure the quality of the clustering
+from sklearn.metrics import silhouette_score
+score = silhouette_score(x, y_kmeans)
+
+# Printing the silhouette score
+print("Silhouette Score:", score)
